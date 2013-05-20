@@ -1,0 +1,34 @@
+{
+  "name": "Vanilla File Manager",
+  "description" : "File Explorer",
+  "package_path": "http://localhost/_ffos/ffos-filemanager/application.zip",
+  "launch_path": "index.html",
+  "version": "0.0",
+  "size": 172496,
+  "release_notes": "0.0",
+  "developer": {
+    "name": "Maiko Gabriel Kinzel Engelke",
+    "url": "http://maikoengelke.com/"
+  },
+  "locales": {
+    "pt_BR": {
+      "description": "Gerenciador de arquivos."
+    },
+    "en_US": {
+      "description": "File Manager"
+    }
+  },
+  "icons": {
+    "16": "/icons/16.png",
+    "64": "/icons/64.png",
+    "128": "/icons/128.png"
+  },
+  "permissions": {
+    "device-storage:sdcard": {
+      "description": "Required to explore and modify file in your SD Card",
+      "access": "readcreate"
+    }
+  },
+  "installs_allowed_from": ["*"],
+  "type": "privileged"
+}
