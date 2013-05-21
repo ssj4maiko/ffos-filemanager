@@ -1,10 +1,5 @@
 'use strict';
 
-var StructFile = {
-	 id		: null
-	,father	: null
-}
-
 var FileDB = (function(){
 	function FileDB(mediaType){ 
 		if(mediaType == null){
@@ -141,16 +136,16 @@ function debug(){
 					for(var k in temp2){
 						var temp3 = temp2[k];
 						log('-------- '+k+' = {');
-						log('-------- '+temp3);
+						log('------------ '+temp3);
 						log('-------- }');
 					}
 				} else {
-					log('---- '+temp2);
+					log('-------- '+temp2);
 				}
 				log('---- }');
 			}
 		} else {
-			log(temp);
+			log('---- '+temp);
 		}
 		log('}');
 	}
