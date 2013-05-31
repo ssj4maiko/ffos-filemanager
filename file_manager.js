@@ -204,20 +204,21 @@ function debug(){
 					for(var k in temp2){
 						var temp3 = temp2[k];
 						log('-------- '+k+' = {');
-						log('-------- '+temp3);
+						log('------------ '+temp3);
 						log('-------- }');
 					}
 				} else {
-					log('---- '+temp2);
+					log('-------- '+temp2);
 				}
 				log('---- }');
 			}
 		} else {
-			log(temp);
+			log('---- '+temp);
 		}
 		log('}');
 	}
 }
+
 function getLocal(){
 	asyncStorage.getItem(fdb.DBname,function(value){
 		OUTPUT.textContent = value;
