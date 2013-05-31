@@ -24,6 +24,7 @@
     "128": "/icons/128.png"
   },
   "permissions": {
+    "storage":{},
     "device-storage:sdcard": {
       "description": "Required to explore and modify file in your SD Card",
       "access": "readcreate"

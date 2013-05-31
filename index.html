@@ -3,9 +3,13 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
-	<script type='text/javascript' src='file_manager.js'></script>
+	<script defer src="async_storage.js"></script>
+	<script defer src='file_manager.js'></script>
 </head>
 <body>
-	
+	<button onclick='getLocal()'style='height:300px;'>Get stuff from localstorage</button>
+	<button onclick='fdb.init()'style='height:300px;'>Initialize</button>
+	<div id='output'>output</div>
+	<script type='text/javascript'>var OUTPUT = document.getElementById('output');</script>
 </body>
 </html>

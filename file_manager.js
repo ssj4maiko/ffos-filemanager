@@ -1,45 +1,16 @@
 'use strict';
 
-var StructFile = {
-	 id		: null
-	,father	: null
-}
-
 var FileDB = (function(){
 	function FileDB(mediaType){ 
 		if(mediaType == null){
 			mediaType = 'sdcard';
 		}
 		var fdb = this;
-		fdb.storage = navigator.getDeviceStorage(mediaType);
-
-		//fdb.storage.addEventListener('change', deviceStorageChangeHandler);
-		//fdb.details.dsEventListener = deviceStorageChangeHandler;
 
 
-		var availreq = fdb.storage.available();
-		availreq.onsuccess = function(e) {
-			switch (e.target.result) {
-				case 'available':
-				  changeState(fdb,FileDB.READY);
-				  alert('o cartão');
-				  scan(fdb); // Start scanning as soon as we're ready
-				  break;
-				case 'unavailable':
-				  changeState(fdb,FileDB.NOCARD);
-				  alert('Sem cartão');
-				  break;
-				case 'shared':
-				  changeState(fdb,FileDB.UNMOUNTED);
-				  alert('Desmontado');
-				  break;
-			}
-		}
-		
-		function changeState(lefdb,teste){
-			//alert(teste);
-		}
-
+		/**
+		**	Scanning directory functions
+		**/
 		this.index = 1;
 		function findDirectory(name,father){
 			for(var i in fdb.directory[father]){
@@ -49,7 +20,7 @@ var FileDB = (function(){
 			return null;
 		}
 		function pushDirectory(name,father){
-			if(!fdb.directory[father]){
+			if(typeof fdb.directory[father] == 'undefined'){
 				fdb.directory[father] = {};
 			}
 			var id = findDirectory(name,father);
@@ -62,6 +33,7 @@ var FileDB = (function(){
 				,directory : true
 				,hidden : name.indexOf('.') === 0
 			};
+
 			fdb.directory[father][data.id] = data;
 			return data.id;
 		}
@@ -89,34 +61,117 @@ var FileDB = (function(){
 			   ,i
 			   ,father = 0;
 			for(i in path){
+				try{
 				father = pushDirectory(path[i],father);
+				}catch(e){alert('Directory: '+e)}
 			}
+			try{
 			pushFile(path[length],father,file);
+			}catch(e){alert('Directory: '+e)}
 		}
-		//alert(fdb.storage);
 		this.directory = Object.create(null);
-	}
-	function scan(fdb){
-      var cursor = fdb.storage.enumerate();
-      cursor.onsuccess = function(){
-      	var file = cursor.result;
-      	document.body.textContent = fdb.index;
-      	try{
-	      	if(file){
-	      		fdb.registerPath(file);
-	    		cursor.continue();
-	      	} else {
-	      		alert('done');
-	      		//debug();
-	      	}
-	    }
-	    catch(e){
-	    	alert(e);
-	    }
-      };
-	}
 
-	return FileDB;
+		/**
+		**	INDEXED DB functions
+		**/
+		this.openDB = function(){
+			try{
+			asyncStorage.getItem(fdb.DBname,function(val){
+				if(val){
+					fdb.directory = val;
+					alert('Already Saved!');
+				}
+				else {
+					fdb.startScan();
+				}
+			});
+			}catch(e){
+				alert(e);
+			}
+		}
+		this.startScan = function(){
+			fdb.directory = Object.create(null);
+			var mediaType = fdb.DBname.substring(7);
+			fdb.storage = navigator.getDeviceStorage(mediaType);
+
+			//fdb.storage.addEventListener('change', deviceStorageChangeHandler);
+			//fdb.details.dsEventListener = deviceStorageChangeHandler;
+
+
+			var availreq = fdb.storage.available();
+			availreq.onsuccess = function(e) {
+				switch (e.target.result) {
+					case 'available':
+					  changeState(fdb,FileDB.READY);
+					  fdb.scan(fdb); // Start scanning as soon as we're ready
+					  break;
+					case 'unavailable':
+					  changeState(fdb,FileDB.NOCARD);
+					  alert('No Card');
+					  break;
+					case 'shared':
+					  changeState(fdb,FileDB.UNMOUNTED);
+					  alert('Unmounted');
+					  break;
+				}
+			}
+		}
+		this.saveDB = function(){
+			asyncStorage.setItem(fdb.DBname,fdb.directory,function(){
+				alert('Data Saved');
+			});
+		}
+		
+	/**
+	**		START POINT
+	**/
+
+		fdb.DBname = 'FileDB/'+mediaType;
+		this.init = function(){
+			fdb.openDB();
+		}
+	}
+	FileDB.prototype = {
+		 curDir : [0]
+		,cd : function(id){
+			if(id == '..')
+				fdb.curDir.pop();
+			else
+				fdb.curDir.push(id);
+		}
+		,ls : function(){
+			return fdb.directory[fdb.curDir];
+		}
+		,pwd : function(){
+			var directories = [],
+				father = fdb.curDir;
+			while(father !== 0){
+				directories.push(fdb.directory[father].name);
+				father = fdb.directory[father].name;
+			}
+		}
+		,scan : function(fdb){
+			var cursor = fdb.storage.enumerate();
+			cursor.onsuccess = function(){
+				try{
+					var file = cursor.result;
+					OUTPUT.textContent = fdb.index;
+					if(file){
+						fdb.registerPath(file);
+						cursor.continue();
+					} else {
+						fdb.saveDB();
+						//try{ debug();			}catch(e){ alert('2 - '+e);}
+						alert('feito');
+					}
+				}
+				catch(e){
+					alert('error on function scan(): '+e);
+				}
+			};
+		}
+	}
+	return FileDB;//.cd(0);
 }());
 
 FileDB.OPENING = 'opening';     // FileDB is initializing itself
@@ -126,6 +181,14 @@ FileDB.UNMOUNTED = 'unmounted'; // Unavailable because card unmounted
 FileDB.CLOSED = 'closed';       // Unavailalbe because FileDB has closed
 
 var fdb = new FileDB();
+//fdb.init();
+
+
+
+function changeState(lefdb,teste){
+	//alert(teste);
+}
+
 function log(txt){
 	document.write(txt+'<br />');
 }
@@ -154,4 +217,9 @@ function debug(){
 		}
 		log('}');
 	}
+}
+function getLocal(){
+	asyncStorage.getItem(fdb.DBname,function(value){
+		OUTPUT.textContent = value;
+	});
 }
